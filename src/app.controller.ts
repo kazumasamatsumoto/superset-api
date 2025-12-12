@@ -83,11 +83,11 @@ export class AppController {
   ) {
     const { dashboardId } = body;
     
-    // ユーザー識別
+    // ユーザー識別（RLS用）
     const username = userId || body.username || 'admin';
-    
+
     console.log('=== Guest Token Request ===');
-    console.log('Username:', username);
+    console.log('RLS User:', username);
     console.log('Dashboard ID:', dashboardId);
 
     // 環境変数チェック
@@ -107,8 +107,9 @@ export class AppController {
     const now = Math.floor(Date.now() / 1000);
     const payload: GuestTokenPayload = {
       user: {
-        username: username,
-        first_name: username.split('_')[0] || username,
+        // Supersetに存在するユーザーを使用
+        username: 'guest_user',
+        first_name: 'Guest',
         last_name: 'User',
       },
       resources: [
@@ -117,7 +118,7 @@ export class AppController {
           id: dashboardId,
         },
       ],
-      rls_rules: rlsRules,
+      rls_rules: rlsRules, // RLS条件で実際のユーザーを識別
       iat: now,
       exp: now + 300, // 5分間有効
       aud: 'superset',
